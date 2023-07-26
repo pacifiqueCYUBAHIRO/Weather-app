@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background-color: #f0f0f0;
+    }
+
+    .container {
+      margin-top: 50px;
+      height: 81vh;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    form {
+      margin-bottom: 20px;
+    }
+
+    input[type="text"] {
+      padding: 10px 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #weatherData {
+      display: none;
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 20px;
+      height: 55vh;
+      border-radius: 4px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #weatherData h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    #weatherData p {
+      font-size: 16px;
+      margin: 5px 0;
+    }
+
+    .loading {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .loading::before {
+      content: "Loading...";
+    }
+
+    .show-loading #weatherData,
+    .show-loading .loading {
+      display: none;
+    }
+
+    .show-loading .loading {
+      display: block;
+    }
+  footer{
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    padding: 10px;
+    align-content: center;
+  }
+  footer a{
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+  }
+
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Weather App</h1>
+  <form id="weatherForm">
+    <label for="locationInput">Enter your location:</label>
+    <input type="text" id="locationInput" required>
+    <button type="submit">Get Weather</button>
+  </form>
+  <div id="weatherData"></div>
+</div>
+<footer>
+  <p> Designed by <a href="">PacifiqueCYUBAHIRO</a> &copy; 2023</p>
+</footer>
+
+
+<script>
+  // Function to fetch weather data from the API
+  async function getWeatherData(location) {
+    const apiKey = '3461203cc0e94e72f37c7a44a4a34dab'; // Replace with your actual API key
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}`;
+
+    try {
+      const response = await fetch(apiUrl);
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      return null;
+    }
+  }
+
+  // Function to process JSON data and return relevant weather information
+  function processWeatherData(data) {
+    if (!data) return null;
+
+    const processedData = {
+      location: data.name,
+      description: data.weather[0].description,
+      temperature: data.main.temp,
+      humidity: data.main.humidity,
+      windSpeed: data.wind.speed,
+    };
+
+    return processedData;
+  }
+
+  // Function to display the weather information on the webpage
+  function displayWeather(data) {
+    if (!data) return;
+
+    const weatherDataDiv = document.getElementById('weatherData');
+    weatherDataDiv.innerHTML = `
+    <h2>Weather for ${data.location}</h2>
+    <p><strong>Description:</strong> ${data.description}</p>
+    <p><strong>Temperature:</strong> ${data.temperature} &#8451;</p>
+    <p><strong>Humidity:</strong> ${data.humidity}%</p>
+    <p><strong>Wind Speed:</strong> ${data.windSpeed} m/s</p>
+  `;
+    weatherDataDiv.style.display = 'block';
+  }
+
+  // Function to handle form submission
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const locationInput = document.getElementById('locationInput');
+    const location = locationInput.value.trim();
+
+    if (location === '') return;
+
+    try {
+      // Display loading message while fetching data
+      const weatherDataDiv = document.getElementById('weatherData');
+      weatherDataDiv.innerHTML = 'Loading...';
+      weatherDataDiv.style.display = 'block';
+
+      const weatherData = await getWeatherData(location);
+      const processedData = processWeatherData(weatherData);
+      displayWeather(processedData);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  // Add form submit event listener
+  const weatherForm = document.getElementById('weatherForm');
+  weatherForm.addEventListener('submit', handleSubmit);
+
+
+</script>
+</body>
+</html>
